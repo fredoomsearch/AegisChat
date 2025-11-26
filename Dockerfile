@@ -49,4 +49,3 @@ HEALTHCHECK --interval=20s --timeout=3s --start-period=20s --retries=3 \
 
 # Default CMD (Render lo puede overridear)
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
-
