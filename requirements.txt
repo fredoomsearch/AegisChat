@@ -15,7 +15,6 @@ openai>=0.27.0
 python-dateutil>=2.8.2
 pytest>=7.2.0
 httpx>=0.23.0
-sqlite3  # Included in Python standard library
 Pillow
 pytesseract
 
