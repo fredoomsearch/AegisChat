@@ -1,0 +1,34 @@
+fastapi>=0.95.0
+uvicorn>=0.21.0
+python-multipart
+requests>=2.28.0
+beautifulsoup4>=4.11.0
+selenium>=4.8.0
+chromedriver-autoinstaller>=0.3.0
+pydantic>=1.10.0
+python-dotenv>=0.21.0
+langdetect>=1.0.9
+validators>=0.20.0
+pytz>=2022.7
+llama-cpp-python>=0.1.68
+openai>=0.27.0
+python-dateutil>=2.8.2
+pytest>=7.2.0
+httpx>=0.23.0
+sqlite3  # Included in Python standard library
+Pillow
+pytesseract
+
+
+#FOR TOR 
+# pip install requests pysocks
+# local (CPU) embedding + index
+# pip install sentence-transformers faiss-cpu
+# optionally if you prefer OpenAI embeddings you can install openai
+# pip install openai
+# pip install sentence-transformers
+
+# FOR VISION API
+# sudo apt update
+# sudo apt install -y tesseract-ocr tesseract-ocr-spa tesseract-ocr-eng
+# pip install pillow pytesseract

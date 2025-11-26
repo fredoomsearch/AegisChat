@@ -1,0 +1,55 @@
+repos:
+  - repo: https://github.com/psf/black
+    rev: 23.9.1
+    hooks:
+      - id: black
+        language_version: python3.11
+
+  - repo: https://github.com/pycqa/isort
+    rev: 5.12.0
+    hooks:
+      - id: isort
+        language_version: python3.11
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.6.9
+    hooks:
+      - id: ruff
+        args: ["--fix"]
+        language_version: python3.11
+
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.2.0
+    hooks:
+      - id: mypy
+        language_version: python3.11
+        additional_dependencies:
+          - sqlmodel
+          - sqlalchemy
+          - types-requests
+          - types-PyYAML
+
+
+
+
+# What this file does and how to use it (quick & practical)
+
+# Nice — this is a .pre-commit-config.yaml that tells pre-commit to run 4 tools automatically on every commit: Black, isort, Ruff (auto-fix), and mypy. Drop this file at your repo root and the repo will start policing format, imports, style, and types before code is committed — instant quality enforcement.
+
+# Below: what each hook does, exact commands to enable it locally & in CI, useful tweaks, and common gotchas + fixes.
+
+# What each hook does
+
+# Black (psf/black) — formats Python code to a consistent style automatically.
+
+# isort (pycqa/isort) — sorts and groups imports (keeps them consistent with Black).
+
+# Ruff (ossf/ruff) — Linting and fast auto-fixes. You set args: ["--fix"] so Ruff will attempt to fix issues automatically on commit. Ruff can replace flake8 + many linters.
+
+# mypy (pre-commit/mirrors-mypy) — static type checking. It will run mypy on changed files.
+
+# How to install & enable (local)
+
+# Run these from repo root:
+
+# Install pre-commit and the dev tools (recommended):

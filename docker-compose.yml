@@ -1,0 +1,84 @@
+version: "3.9"
+
+services:
+  aegis:
+    build: .
+    container_name: aegis_app
+    restart: always
+    ports:
+      - "8000"
+    environment:
+      - DATABASE_URL=postgresql://aegis:password@db:5432/aegisdb
+      - LLAMA_THREADS=6
+    volumes:
+      - ./models:/app/models
+      - ./ui:/app/ui
+    networks:
+      - aegis-net
+
+  db:
+    image: postgres:15
+    container_name: aegis_db
+    restart: always
+    environment:
+      POSTGRES_USER: aegis
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: aegisdb
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - aegis-net
+
+  nginx:
+    image: nginx:latest
+    container_name: aegis_reverse_proxy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./certbot:/certbot
+      - /etc/letsencrypt:/etc/letsencrypt
+    networks:
+      - aegis-net
+    depends_on:
+      - aegis
+
+  certbot:
+    image: certbot/certbot
+    container_name: aegis_certbot
+    command: certonly --webroot --webroot-path=/certbot \
+             --email YOUR_EMAIL --agree-tos \
+             --no-eff-email -d YOUR_DOMAIN
+    volumes:
+      - ./certbot:/certbot
+      - /etc/letsencrypt:/etc/letsencrypt
+    networks:
+      - aegis-net
+
+  prometheus:
+    image: prom/prometheus
+    container_name: aegis_prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+    networks:
+      - aegis-net
+
+  grafana:
+    image: grafana/grafana
+    container_name: aegis_grafana
+    ports:
+      - "3000:3000"
+    depends_on:
+      - prometheus
+    networks:
+      - aegis-net
+
+volumes:
+  postgres_data:
+
+networks:
+  aegis-net:
+    driver: bridge

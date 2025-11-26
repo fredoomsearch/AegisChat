@@ -1,0 +1,40 @@
+[tool.black]
+line-length = 88
+target-version = ["py311"]
+
+[tool.isort]
+profile = "black"
+line_length = 88
+py_version = 311
+include_trailing_comma = true
+combine_as_imports = true
+balanced_wrapping = true
+
+[tool.ruff]
+line-length = 88
+target-version = "py311"
+
+select = [
+  "E",  # pycodestyle errors
+  "F",  # pyflakes
+  "W",  # pycodestyle warnings
+  "I",  # import sorting
+  "B",  # bugbear
+]
+
+extend-ignore = [
+  "E203",
+  "W503",
+]
+
+fix = true
+show-fixes = true
+
+[tool.mypy]
+python_version = "3.11"
+ignore_missing_imports = true
+follow_imports = "skip"
+warn_unused_ignores = true
+warn_redundant_casts = true
+warn_return_any = false
+warn_unreachable = true

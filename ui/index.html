@@ -1,0 +1,1489 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <title>AEGIS CHAT</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" href="/ui/urlimg.png" type="image/png">
+
+  <!-- Font Awesome -->
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer"
+  />
+
+  <!-- Markdown & sanitizer -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@2.4.0/dist/purify.min.js"></script>
+
+  <style>
+    :root{
+      --bg-1:#020617;
+      --bg-2:#020617;
+      --panel:#020818;
+      --muted:#94a3b8;
+      --muted-soft:#6b7280;
+      --neon-green:#39ff14;
+      --neon-cyan:#22d3ee;
+      --accent:#0ea5e9;
+      --danger:#fb7185;
+      --glass:rgba(15,23,42,0.8);
+      --border-subtle:rgba(148,163,184,0.18);
+      --shadow-soft:0 18px 45px rgba(15,23,42,0.85);
+      --radius-lg:14px;
+      --radius-xl:18px;
+      --neon-magenta:#f472b6;
+      --neon-violet:#a855f7;
+    }
+
+    *{
+      box-sizing:border-box;
+    }
+
+    html,body{
+      height:100%;
+      margin:0;
+      padding:0;
+      font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial;
+      color:#e5e7eb;
+      background:
+        radial-gradient(900px 900px at 10% 0%, rgba(56,189,248,0.16), transparent 70%),
+        radial-gradient(800px 800px at 90% 100%, rgba(74,222,128,0.12), transparent 70%),
+        radial-gradient(600px 600px at 10% 100%, rgba(125,211,252,0.15), transparent 65%),
+        linear-gradient(180deg,#020617 0%,#020617 100%);
+      display:flex;
+      justify-content:center;
+      align-items:stretch;
+    }
+
+    body{
+      padding:10px;
+    }
+
+    .app-shell{
+      position:relative;
+      display:flex;
+      flex-direction:column;
+      width:100%;
+      max-width:1180px;
+      max-height:900px;
+      border-radius:24px;
+      overflow:hidden;
+      background:
+        radial-gradient(circle at top left, rgba(37,99,235,0.18), transparent 50%),
+        radial-gradient(circle at bottom right, rgba(16,185,129,0.18), transparent 50%),
+        rgba(15,23,42,0.96);
+      border:1px solid rgba(148,163,184,0.25);
+      box-shadow:var(--shadow-soft);
+      backdrop-filter:blur(22px);
+    }
+
+    .app-shell::before{
+      content:"";
+      position:absolute;
+      inset:-1px;
+      border-radius:inherit;
+      border:1px solid rgba(56,189,248,0.35);
+      box-shadow:
+        0 0 22px rgba(56,189,248,0.6),
+        0 0 38px rgba(34,197,94,0.45);
+      pointer-events:none;
+      opacity:0.65;
+    }
+
+    .app-shell::after{
+      content:"";
+      position:absolute;
+      inset:0;
+      border-radius:inherit;
+      background:
+        repeating-linear-gradient(
+          to bottom,
+          rgba(15,23,42,0.0) 0px,
+          rgba(15,23,42,0.0) 2px,
+          rgba(148,163,184,0.08) 3px
+        );
+      mix-blend-mode:soft-light;
+      opacity:0.16;
+      pointer-events:none;
+    }
+
+    header{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      padding:0.75rem 1rem;
+      background:linear-gradient(90deg,rgba(15,23,42,0.92),rgba(15,23,42,0.7));
+      border-bottom:1px solid rgba(148,163,184,0.22);
+      position:relative;
+      z-index:2;
+    }
+
+    header::after{
+      content:"";
+      position:absolute;
+      inset:0;
+      background:
+        linear-gradient(90deg,rgba(56,189,248,0.25),transparent 30%,transparent 70%,rgba(34,197,94,0.25));
+      opacity:0.08;
+      pointer-events:none;
+    }
+
+    header img{
+      height:46px;
+      width:46px;
+      border-radius:14px;
+      object-fit:cover;
+      box-shadow:
+        0 0 0 1px rgba(148,163,184,0.35),
+        0 0 18px rgba(34,197,94,0.45),
+        0 0 35px rgba(56,189,248,0.35);
+      background:radial-gradient(circle at 30% 0%,rgba(248,250,252,0.18),transparent 55%);
+      transition:transform .18s ease, box-shadow .18s ease;
+      animation:pulseRing 3s infinite;
+    }
+
+    header img:hover{
+      transform:translateY(-1px) scale(1.02);
+      box-shadow:
+        0 0 0 1px rgba(148,163,184,0.5),
+        0 0 26px rgba(34,197,94,0.75),
+        0 0 40px rgba(56,189,248,0.55);
+    }
+
+    @keyframes pulseRing{
+      0%{
+        transform:translateY(0);
+        box-shadow:
+          0 0 0 1px rgba(148,163,184,0.35),
+          0 0 16px rgba(34,197,94,0.3),
+          0 0 30px rgba(56,189,248,0.25);
+      }
+      50%{
+        transform:translateY(-1px);
+        box-shadow:
+          0 0 0 1px rgba(148,163,184,0.5),
+          0 0 26px rgba(34,197,94,0.5),
+          0 0 40px rgba(56,189,248,0.45);
+      }
+      100%{
+        transform:translateY(0);
+        box-shadow:
+          0 0 0 1px rgba(148,163,184,0.35),
+          0 0 18px rgba(34,197,94,0.3),
+          0 0 34px rgba(56,189,248,0.3);
+      }
+    }
+
+    header .title{
+      flex:1;
+      text-align:left;
+      min-width:0;
+    }
+
+    header .title h1{
+      margin:0;
+      font-size:1.02rem;
+      color:#e5e7eb;
+      letter-spacing:0.08em;
+      text-transform:uppercase;
+      display:flex;
+      align-items:center;
+      gap:6px;
+    }
+
+    header .title h1::after{
+      content:"●";
+      font-size:0.6rem;
+      color:var(--neon-green);
+      text-shadow:0 0 6px rgba(34,197,94,0.9);
+    }
+
+    header .title p{
+      margin:2px 0 0;
+      font-size:0.75rem;
+      color:var(--muted-soft);
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    .lang-controls{
+      display:flex;
+      gap:6px;
+      margin-left:8px;
+    }
+
+    .lang-controls button{
+      border-radius:999px;
+      padding:6px 9px;
+      font-size:0.76rem;
+      border:1px solid rgba(148,163,184,0.45);
+      background:radial-gradient(circle at top,rgba(15,23,42,0.9),rgba(15,23,42,0.7));
+      color:#e5e7eb;
+      cursor:pointer;
+      font-weight:600;
+      letter-spacing:0.03em;
+      text-transform:uppercase;
+      transition:
+        background .16s ease,
+        color .16s ease,
+        border-color .16s ease,
+        transform .08s ease;
+    }
+
+    .lang-controls button:hover{
+      transform:translateY(-0.5px);
+      border-color:rgba(56,189,248,0.6);
+    }
+
+    .lang-controls button.selected{
+      color:#020617;
+      background:linear-gradient(135deg,var(--neon-green),#bbf7d0);
+      border-color:rgba(34,197,94,0.9);
+      box-shadow:0 0 12px rgba(34,197,94,0.6);
+    }
+
+    .mode-indicator{
+      margin-left:8px;
+      padding:6px 10px;
+      border-radius:999px;
+      background:radial-gradient(circle at top left,rgba(56,189,248,0.22),rgba(15,23,42,0.9));
+      color:#e5e7eb;
+      font-size:0.76rem;
+      border:1px solid rgba(148,163,184,0.55);
+      display:flex;
+      align-items:center;
+      gap:6px;
+      animation:modeGlow 6s ease-in-out infinite alternate;
+      white-space:nowrap;
+    }
+
+    .mode-indicator::before{
+      content:"⚙";
+      font-size:0.8rem;
+      opacity:0.9;
+    }
+
+    @keyframes modeGlow{
+      0%{
+        box-shadow:0 0 0 rgba(56,189,248,0.0);
+        border-color:rgba(148,163,184,0.55);
+      }
+      100%{
+        box-shadow:0 0 12px rgba(56,189,248,0.75);
+        border-color:rgba(56,189,248,0.9);
+      }
+    }
+
+    header > div:last-of-type{
+      display:flex;
+      gap:6px;
+      margin-left:8px;
+    }
+
+    .icon-btn{
+      background:radial-gradient(circle at top,rgba(15,23,42,0.95),rgba(15,23,42,0.8));
+      padding:.5rem;
+      border-radius:12px;
+      color:var(--neon-cyan);
+      border:1px solid rgba(148,163,184,0.5);
+      cursor:pointer;
+      min-width:34px;
+      min-height:34px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:0.8rem;
+      transition:
+        background .16s ease,
+        border-color .16s ease,
+        box-shadow .16s ease,
+        transform .08s ease;
+    }
+
+    .icon-btn:hover{
+      background:radial-gradient(circle at top,rgba(30,64,175,0.8),rgba(15,23,42,0.95));
+      border-color:rgba(56,189,248,0.8);
+      box-shadow:0 0 12px rgba(56,189,248,0.55);
+      transform:translateY(-1px);
+    }
+
+    .icon-btn:active{
+      transform:translateY(0);
+      box-shadow:none;
+    }
+
+    .main{
+      display:flex;
+      flex:1;
+      min-height:0;
+      padding:10px;
+      gap:10px;
+      position:relative;
+      z-index:1;
+    }
+
+    .chat-col{
+      flex:1.4;
+      display:flex;
+      flex-direction:column;
+      min-width:0;
+      border-radius:var(--radius-xl);
+      background:
+        radial-gradient(circle at top left,rgba(30,64,175,0.4),transparent 60%),
+        radial-gradient(circle at bottom right,rgba(22,163,74,0.35),transparent 65%),
+        rgba(15,23,42,0.96);
+      border:1px solid rgba(148,163,184,0.28);
+      box-shadow:0 18px 38px rgba(15,23,42,0.85);
+      overflow:hidden;
+      position:relative;
+      animation:chatNeonPulse 7s ease-in-out infinite alternate;
+    }
+
+    .chat-col::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      background:
+        linear-gradient(180deg,rgba(148,163,184,0.12),transparent 30%,transparent 70%,rgba(30,64,175,0.16));
+      opacity:0.18;
+      pointer-events:none;
+    }
+
+    @keyframes chatNeonPulse{
+      0%{
+        box-shadow:
+          0 18px 38px rgba(15,23,42,0.9),
+          0 0 0 rgba(56,189,248,0.0);
+      }
+      100%{
+        box-shadow:
+          0 18px 38px rgba(15,23,42,0.85),
+          0 0 30px rgba(56,189,248,0.55);
+      }
+    }
+
+    #chat{
+      flex:1;
+      padding:1.25rem 1.25rem 1rem;
+      overflow-y:auto;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      position:relative;
+    }
+
+    #chat::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      background-image:
+        radial-gradient(circle at 0 0, rgba(248,250,252,0.05) 0, transparent 55%),
+        radial-gradient(circle at 100% 100%, rgba(248,250,252,0.04) 0, transparent 55%);
+      opacity:0.7;
+      pointer-events:none;
+    }
+
+    #chat > .bubble{
+      position:relative;
+    }
+
+    .bubble{
+      max-width:72%;
+      padding:0.85rem 0.95rem;
+      border-radius:14px;
+      word-break:break-word;
+      line-height:1.32;
+      font-size:0.93rem;
+      position:relative;
+      border:1px solid rgba(148,163,184,0.28);
+      backdrop-filter:blur(9px);
+      background:rgba(15,23,42,0.98);
+      box-shadow:0 12px 26px rgba(15,23,42,0.9);
+    }
+
+    .bubble::after{
+      content:"";
+      position:absolute;
+      width:8px;
+      height:8px;
+      border-radius:999px;
+      bottom:-4px;
+    }
+
+    .bubble-appear{
+      animation:bubbleIn 0.25s ease-out;
+    }
+
+    @keyframes bubbleIn{
+      0%{
+        opacity:0;
+        transform:translateY(6px) scale(0.97);
+        filter:blur(1px);
+      }
+      100%{
+        opacity:1;
+        transform:translateY(0) scale(1);
+        filter:blur(0);
+      }
+    }
+
+    .user{
+      align-self:flex-end;
+      background:
+        radial-gradient(circle at top left,
+          rgba(22, 0, 185, 0.95),
+          rgba(147,51,234,0.98)
+        );
+      color:#fdf2ff;
+      border-color:rgba(54, 0, 161, 0.9);
+      box-shadow:
+        0 12px 30px rgba(147,51,234,0.95),
+        0 0 18px rgba(76, 0, 147, 0.9);
+    }
+
+    .user::after{
+      right:14px;
+      background:rgba(48, 0, 221, 0.98);
+    }
+
+    .bot{
+      align-self:flex-start;
+      background:radial-gradient(circle at top left,rgba(5,46,22,0.9),rgba(15,23,42,0.98));
+      color:#bbf7d0;
+      border-color:rgba(34,197,94,0.75);
+      text-shadow:0 0 8px rgba(34,197,94,0.5);
+      box-shadow:0 12px 30px rgba(4,120,87,0.9);
+    }
+
+    .bot::after{
+      left:14px;
+      background:rgba(22,163,74,0.95);
+    }
+
+    .error{
+      align-self:center;
+      background:radial-gradient(circle at top,rgba(127,29,29,0.95),rgba(15,23,42,1));
+      color:#fecaca;
+      border-color:rgba(248,113,113,0.85);
+      box-shadow:0 12px 32px rgba(127,29,29,0.98);
+    }
+
+    .error::after{
+      display:none;
+    }
+
+    .typing{
+      opacity:0.9;
+      font-style:italic;
+    }
+
+    .typing::before{
+      content:"●●● ";
+      letter-spacing:2px;
+      font-size:0.75rem;
+      opacity:0.85;
+      display:inline-block;
+      animation:typingDots 1s infinite ease-in-out;
+    }
+
+    @keyframes typingDots{
+      0%{ transform:translateY(0); opacity:0.4; }
+      25%{ transform:translateY(-1px); opacity:0.9; }
+      50%{ transform:translateY(0); opacity:0.6; }
+      75%{ transform:translateY(-1px); opacity:1; }
+      100%{ transform:translateY(0); opacity:0.4; }
+    }
+
+    #controls{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      padding:0.8rem 1rem 1rem;
+      border-top:1px solid rgba(148,163,184,0.35);
+      background:linear-gradient(180deg,rgba(15,23,42,0.98),rgba(15,23,42,1));
+      position:relative;
+      z-index:1;
+    }
+
+    #controls::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      background:radial-gradient(circle at top left,rgba(37,99,235,0.28),transparent 70%);
+      opacity:0.2;
+      pointer-events:none;
+    }
+
+    #msg{
+      flex:1;
+      padding:.7rem 0.9rem;
+      border-radius:999px;
+      background:radial-gradient(circle at top,rgba(15,23,42,0.9),rgba(15,23,42,1));
+      color:#e5e7eb;
+      border:1px solid rgba(148,163,184,0.7);
+      outline:none;
+      font-size:0.9rem;
+      transition:
+        border-color .16s ease,
+        box-shadow .16s ease,
+        background .16s ease;
+    }
+
+    #msg::placeholder{
+      color:rgba(148,163,184,0.85);
+    }
+
+    #msg:focus{
+      border-color:rgba(56,189,248,0.9);
+      box-shadow:0 0 0 1px rgba(56,189,248,0.5),0 0 22px rgba(56,189,248,0.45);
+      background:radial-gradient(circle at top,rgba(15,23,42,1),rgba(15,23,42,0.96));
+    }
+
+    #sendBtn{
+      padding:.62rem 1.15rem;
+      border-radius:999px;
+      background:linear-gradient(135deg,#0ea5e9,#22c55e);
+      color:white;
+      border:none;
+      font-weight:700;
+      font-size:0.88rem;
+      letter-spacing:0.04em;
+      text-transform:uppercase;
+      cursor:pointer;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:6px;
+      box-shadow:0 12px 30px rgba(56,189,248,0.8);
+      transition:
+        transform .08s ease,
+        box-shadow .12s ease,
+        filter .12s ease;
+      position:relative;
+      white-space:nowrap;
+    }
+
+    #sendBtn::after{
+      content:"⏎";
+      font-size:0.85rem;
+      opacity:0.9;
+    }
+
+    #sendBtn:hover{
+      transform:translateY(-1px);
+      filter:brightness(1.06);
+      box-shadow:0 16px 34px rgba(56,189,248,0.95);
+    }
+
+    #sendBtn:active{
+      transform:translateY(0);
+      box-shadow:0 8px 18px rgba(56,189,248,0.7);
+    }
+
+    #sendBtn[disabled]{
+      opacity:0.6;
+      cursor:not-allowed;
+      transform:none;
+      box-shadow:none;
+      filter:none;
+    }
+
+    .sidebar{
+      flex:0.9;
+      max-width:360px;
+      min-width:260px;
+      padding:0.8rem;
+      box-sizing:border-box;
+      border-radius:var(--radius-xl);
+      border:1px solid rgba(148,163,184,0.35);
+      background:
+        radial-gradient(circle at top right,rgba(56,189,248,0.25),transparent 65%),
+        rgba(15,23,42,0.96);
+      box-shadow:0 16px 32px rgba(15,23,42,0.9);
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      overflow:auto;
+      position:relative;
+    }
+
+    .sidebar::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      background-image:radial-gradient(circle at 80% 0%,rgba(248,250,252,0.06) 0,transparent 50%);
+      opacity:0.8;
+      pointer-events:none;
+    }
+
+    .sources{
+      position:relative;
+      z-index:1;
+      background:radial-gradient(circle at top left,rgba(15,23,42,0.95),rgba(15,23,42,1));
+      border:1px solid rgba(148,163,184,0.45);
+      padding:.85rem;
+      border-radius:14px;
+      margin-bottom:8px;
+      color:var(--muted);
+      box-shadow:0 10px 22px rgba(15,23,42,0.9);
+    }
+
+    .sources strong{
+      font-size:0.85rem;
+      color:#e5e7eb;
+    }
+
+    #conv-info{
+      margin-top:12px;
+    }
+
+    #conv-info span{
+      font-family:"JetBrains Mono","Fira Code",monospace;
+      font-size:0.72rem;
+      color:#e5e7eb;
+      background:rgba(15,23,42,0.9);
+      padding:3px 6px;
+      border-radius:999px;
+      border:1px dashed rgba(148,163,184,0.5);
+    }
+
+    .sources-list{
+      margin-top:6px;
+      font-size:0.8rem;
+      color:var(--muted-soft);
+      max-height:260px;
+      overflow:auto;
+    }
+
+    .sources-list-item{
+      margin-bottom:6px;
+      padding:4px 6px;
+      border-radius:8px;
+      background:rgba(15,23,42,0.95);
+      border:1px solid rgba(148,163,184,0.25);
+    }
+
+    .sources-list-item a{
+      color:var(--accent);
+      text-decoration:none;
+      font-weight:500;
+    }
+
+    .sources-list-item a:hover{
+      text-decoration:underline;
+    }
+
+    .sources-list-item small{
+      display:block;
+      margin-top:2px;
+      color:var(--muted-soft);
+    }
+
+    .visually-hidden{
+      position:absolute!important;
+      height:1px;
+      width:1px;
+      overflow:hidden;
+      clip:rect(1px,1px,1px,1px);
+      white-space:nowrap;
+    }
+
+    #chat::-webkit-scrollbar,
+    .sidebar::-webkit-scrollbar{
+      width:8px;
+    }
+
+    #chat::-webkit-scrollbar-track,
+    .sidebar::-webkit-scrollbar-track{
+      background:rgba(15,23,42,0.95);
+    }
+
+    #chat::-webkit-scrollbar-thumb,
+    .sidebar::-webkit-scrollbar-thumb{
+      background:rgba(51,65,85,0.9);
+      border-radius:999px;
+    }
+
+    #chat::-webkit-scrollbar-thumb:hover,
+    .sidebar::-webkit-scrollbar-thumb:hover{
+      background:rgba(75,85,99,1);
+    }
+
+    @media(max-width:1024px){
+      .app-shell{
+        max-height:none;
+        height:100%;
+        border-radius:0;
+      }
+    }
+
+    @media(max-width:940px){
+      .sidebar{
+        display:none;
+      }
+      .chat-col{
+        flex:1;
+      }
+      .bubble{
+        max-width:92%;
+      }
+      header .title p{
+        white-space:normal;
+      }
+    }
+
+    @media(max-width:640px){
+      body{
+        padding:0;
+      }
+      header{
+        flex-wrap:wrap;
+        row-gap:8px;
+      }
+      header .title h1{
+        font-size:0.96rem;
+      }
+      .mode-indicator{
+        display:none;
+      }
+      #controls{
+        padding:0.65rem 0.75rem 0.8rem;
+        gap:6px;
+      }
+      #sendBtn{
+        padding:.55rem 0.9rem;
+      }
+      .lang-controls{
+        order:3;
+      }
+    }
+
+    @media(max-width:480px){
+      header{
+        padding:0.6rem 0.75rem;
+      }
+      header img{
+        height:40px;
+        width:40px;
+      }
+      #msg{
+        font-size:0.85rem;
+      }
+      .bubble{
+        font-size:0.88rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app-shell">
+    <header>
+      <img src="ui/6vXUM5S.png" alt="AEGIS logo" id="logo" />
+      <div class="title">
+        <h1>AEGIS CHAT</h1>
+        <p>Memoria • Búsqueda web • LLM local y remoto</p>
+      </div>
+
+      <div class="lang-controls">
+        <button id="langEs" aria-pressed="true">ES</button>
+        <button id="langEn" aria-pressed="false">EN</button>
+      </div>
+
+      <div class="mode-indicator" id="modeIndicator">Modo: Chat</div>
+
+      <div>
+        <button id="timeBtn" class="icon-btn" title="Tiempo de respuesta: —">⏱</button>
+        <button id="exportConv" class="icon-btn" title="Exportar id de conversación">📋</button>
+        <button id="importConv" class="icon-btn" title="Importar id de conversación">📥</button>
+        <button id="clearConv" class="icon-btn" title="Borrar id local">🗑</button>
+      </div>
+    </header>
+
+    <main class="main">
+      <section class="chat-col">
+        <div id="chat"></div>
+
+        <div id="controls">
+          <button id="webBtn" class="icon-btn" aria-pressed="false" title="Modo búsqueda web">
+            <i class="fas fa-globe"></i>
+          </button>
+          <button id="urlBtn" class="icon-btn" aria-pressed="false" title="Modo leer URL">
+            <i class="fas fa-link"></i>
+          </button>
+
+          <!-- Botón e input para imagen -->
+          <button id="imgBtn" class="icon-btn" aria-pressed="false" title="Analizar imagen">
+            <i class="fas fa-image"></i>
+          </button>
+
+          <input
+            id="msg"
+            type="text"
+            placeholder="Escribe tu mensaje..."
+            autocomplete="off"
+          />
+          <button id="sendBtn">Enviar</button>
+        </div>
+      </section>
+
+      <aside class="sidebar">
+        <div class="sources" id="conv-info">
+          <strong>Info sesión</strong>
+          <div style="margin-top:6px;color:var(--muted);font-size:0.9rem;">
+            Id local: <span id="conv-id-display">—</span>
+          </div>
+          <div
+            id="timeout-label"
+            style="margin-top:4px;color:var(--muted-soft);font-size:0.8rem;"
+          >
+            Tiempo de respuesta: —
+          </div>
+        </div>
+
+        <!-- Caja de fuentes / recursos externos -->
+        <div class="sources" id="sources-box">
+          <strong id="sources-title">Fuentes</strong>
+          <div id="sources-content" class="sources-list">
+            <!-- Se llena dinámicamente -->
+          </div>
+        </div>
+      </aside>
+    </main>
+
+    <!-- Import / export de conversación -->
+    <input
+      id="hidden-file"
+      type="file"
+      accept="application/json"
+      class="visually-hidden"
+    />
+
+    <!-- Input real para imágenes (oculto) -->
+    <input
+      id="imgInput"
+      type="file"
+      accept="image/*"
+      class="visually-hidden"
+    />
+  </div>
+
+  <script>
+    (function(){
+      const endpoints = {
+        websearch:'/websearch',
+        chat:'/chat',
+        history:'/chat/history',
+        analyzeImage:'/analyze_image'
+      };
+
+      const chat          = document.getElementById("chat");
+      const modeIndicator = document.getElementById("modeIndicator");
+      const msgInput      = document.getElementById("msg");
+      const sendBtn       = document.getElementById("sendBtn");
+      const webBtn        = document.getElementById("webBtn");
+      const urlBtn        = document.getElementById("urlBtn");
+      const imgBtn        = document.getElementById("imgBtn");
+      const imgInput      = document.getElementById("imgInput");
+      const langEs        = document.getElementById("langEs");
+      const langEn        = document.getElementById("langEn");
+      const exportConv    = document.getElementById("exportConv");
+      const importConv    = document.getElementById("importConv");
+      const clearConv     = document.getElementById("clearConv");
+      const hiddenFile    = document.getElementById("hidden-file");
+      const convIdDisplay = document.getElementById("conv-id-display");
+      const timeBtn       = document.getElementById("timeBtn");
+      const timeoutLabel  = document.getElementById("timeout-label");
+
+      const sourcesTitle  = document.getElementById("sources-title");
+      const sourcesContent= document.getElementById("sources-content");
+
+      let currentMode     = 'chat';
+      let conversationId  = localStorage.getItem('aegis_conv') || null;
+      let selectedLang    = localStorage.getItem('aegis_lang') || 'es';
+      let pending         = false;
+      const webCache      = new Map();
+
+      const CHAT_MAX_TIMEOUT_MS = 280000;
+      let lastLatencyMs   = null;
+
+      function el(tag, opts={}){
+        const e = document.createElement(tag);
+        if (opts.class) e.className = opts.class;
+        if (opts.text)  e.textContent = opts.text;
+        if (opts.html)  e.innerHTML = opts.html;
+        if (opts.attrs) Object.entries(opts.attrs).forEach(([k,v]) => e.setAttribute(k,v));
+        return e;
+      }
+
+      function scrollBottom(){
+        chat.scrollTop = chat.scrollHeight;
+      }
+
+      function sanitizeAndRenderMarkdown(md){
+        return DOMPurify.sanitize(
+          marked.parse(md || ''),
+          {
+            ALLOWED_TAGS: ['p','a','strong','em','code','pre','ul','ol','li','br','img'],
+            ALLOWED_ATTR: ['href','target','rel','src','alt']
+          }
+        );
+      }
+
+      function appendBubble(text, role='bot', allowHtml=false){
+        const node = el('div', {
+          class:'bubble bubble-appear ' + (role==='user' ? 'user' : role==='error' ? 'error' : 'bot')
+        });
+        node.setAttribute('role','article');
+
+        if (allowHtml){
+          node.innerHTML = sanitizeAndRenderMarkdown(text);
+        }else{
+          node.textContent = text;
+        }
+
+        chat.appendChild(node);
+        setTimeout(() => node.classList.remove('bubble-appear'), 300);
+        scrollBottom();
+        return node;
+      }
+
+      function appendTyping(){
+        removeTyping();
+        const t = el('div', {
+          class:'bubble bot typing',
+          attrs:{id:'typing-bubble','aria-hidden':'false'}
+        });
+        t.textContent = (selectedLang === 'es' ? 'Escribiendo…' : 'Typing…');
+        chat.appendChild(t);
+        scrollBottom();
+      }
+
+      function removeTyping(){
+        const t = document.getElementById('typing-bubble');
+        if (t) t.remove();
+      }
+
+      // ======== SOURCES HANDLING ========
+
+      function clearSources(){
+        if (!sourcesContent) return;
+        sourcesContent.innerHTML = '';
+        const msg = selectedLang === 'es'
+          ? 'Sin recursos externos aún.'
+          : 'No external resources yet.';
+        sourcesContent.appendChild(el('div',{text: msg}));
+      }
+
+      function renderWebSources(query, results){
+        if (!sourcesContent) return;
+        sourcesContent.innerHTML = '';
+
+        const qLabel = selectedLang === 'es'
+          ? `Búsqueda web: "${query}"`
+          : `Web search: "${query}"`;
+        const header = el('div',{text:qLabel});
+        header.style.marginBottom = '6px';
+        header.style.fontWeight = '600';
+        sourcesContent.appendChild(header);
+
+        if (!Array.isArray(results) || results.length === 0){
+          const msg = selectedLang === 'es'
+            ? 'Sin resultados.'
+            : 'No results.';
+          sourcesContent.appendChild(el('div',{text:msg}));
+          return;
+        }
+
+        results.forEach((r, idx) => {
+          const item = el('div',{class:'sources-list-item'});
+          const title = r.title || (selectedLang === 'es' ? 'Resultado' : 'Result');
+          const link  = r.link || '#';
+          const snippet = r.snippet || '';
+
+          const a = el('a',{text: `${idx+1}. ${title}`, attrs:{href:link,target:'_blank',rel:'noopener noreferrer'}});
+          item.appendChild(a);
+
+          if (snippet){
+            const small = el('small',{text: snippet});
+            item.appendChild(small);
+          }
+
+          sourcesContent.appendChild(item);
+        });
+      }
+
+      function renderUrlSource(url){
+        if (!sourcesContent) return;
+        sourcesContent.innerHTML = '';
+        const label = selectedLang === 'es' ? 'URL analizada:' : 'Analyzed URL:';
+        const wrapper = el('div',{class:'sources-list-item'});
+        const span = el('div',{text:label});
+        span.style.marginBottom = '4px';
+        span.style.fontWeight = '600';
+
+        const a = el('a',{
+          text:url,
+          attrs:{href:url,target:'_blank',rel:'noopener noreferrer'}
+        });
+
+        wrapper.appendChild(span);
+        wrapper.appendChild(a);
+        sourcesContent.appendChild(wrapper);
+      }
+
+      // ======================
+
+      async function fetchWithTimeout(url, opts={}, {timeout=CHAT_MAX_TIMEOUT_MS, retries=1}={}){
+        for (let attempt=0; attempt<=retries; attempt++){
+          const controller = new AbortController();
+          const id = setTimeout(() => controller.abort(), timeout);
+          try{
+            const res = await fetch(url, {...opts, signal: controller.signal});
+            clearTimeout(id);
+            return res;
+          }catch(err){
+            clearTimeout(id);
+            if (attempt === retries) throw err;
+            await new Promise(r => setTimeout(r, 300*(attempt+1)));
+          }
+        }
+      }
+
+      async function callWebSearch(q, n=3){
+        if (!q) return [];
+        if (webCache.has(q)) {
+          const cached = webCache.get(q);
+          renderWebSources(q, cached);
+          return cached;
+        }
+
+        try{
+          const url = new URL(endpoints.websearch, location.origin);
+          url.searchParams.set('q', q);
+          url.searchParams.set('n', String(n));
+
+          const res = await fetchWithTimeout(
+            url.toString(),
+            {},
+            {timeout:12000, retries:1}
+          );
+
+          if (!res.ok){
+            const txt = await res.text().catch(()=>null);
+            appendBubble(`(websearch error ${res.status}) ${txt || ''}`,'error');
+            return [];
+          }
+
+          const data = await res.json().catch(()=>[]);
+          webCache.set(q, data);
+          renderWebSources(q, data);
+          return data;
+        }catch(e){
+          console.error(e);
+          appendBubble(
+            selectedLang === 'es'
+              ? '(fallo en /websearch)'
+              : '(failed /websearch)',
+            'error'
+          );
+          return [];
+        }
+      }
+
+      async function callChat(payload){
+        const url = new URL(endpoints.chat, location.origin);
+        const res = await fetchWithTimeout(
+          url.toString(),
+          {
+            method:'POST',
+            headers:{
+              'Content-Type':'application/json',
+              'Accept':'application/json'
+            },
+            body: JSON.stringify(payload)
+          },
+          {
+            timeout: CHAT_MAX_TIMEOUT_MS,
+            retries: 0
+          }
+        );
+
+        if (!res.ok){
+          appendBubble(`(server error ${res.status})`,'error');
+          throw new Error('chat error '+res.status);
+        }
+
+        const json = await res.json().catch(() => ({
+          response:'',
+          conversation_id: conversationId
+        }));
+
+        // Optional: if backend ever sends json.sources, we could also render here.
+
+        return {
+          response: json.response || '',
+          conversation_id: json.conversation_id || conversationId
+        };
+      }
+
+      function formatLatency(ms){
+        if (ms == null) return '—';
+        const sec = ms / 1000;
+        if (sec < 1){
+          return `${ms.toFixed(0)} ms`;
+        }
+        return `${sec.toFixed(1)} s`;
+      }
+
+      function updateLatencyLabel(){
+        const baseEs = 'Tiempo de respuesta: ';
+        const baseEn = 'Response time: ';
+        const label = (selectedLang === 'es' ? baseEs : baseEn) + formatLatency(lastLatencyMs);
+
+        if (timeoutLabel){
+          timeoutLabel.textContent = label;
+        }
+        if (timeBtn){
+          timeBtn.setAttribute('title', label);
+        }
+      }
+
+      async function sendMessage(text){
+        if (!text || pending) return;
+
+        appendBubble(text,'user');
+        msgInput.value='';
+        appendTyping();
+        setPending(true);
+
+        const startTs = performance.now();
+
+        try{
+          if (currentMode === 'web'){
+            // Esto hará la búsqueda y actualizará las fuentes
+            callWebSearch(text).catch(()=>{});
+          } else if (currentMode === 'url'){
+            // Mostrar la URL como recurso externo
+            renderUrlSource(text);
+          } else {
+            // Modo chat normal: sin recursos externos explícitos
+            clearSources();
+          }
+
+          const prefix =
+            currentMode === 'web' ? 'web:' :
+            currentMode === 'url' ? 'url:' :
+            '';
+
+          const payload = {
+            message: prefix + text,
+            conversation_id: conversationId,
+            lang: selectedLang
+          };
+
+          const data = await callChat(payload);
+          const elapsed = performance.now() - startTs;
+          lastLatencyMs = elapsed;
+          updateLatencyLabel();
+
+          conversationId = data.conversation_id || conversationId;
+
+          if (conversationId){
+            localStorage.setItem('aegis_conv', conversationId);
+            convIdDisplay.textContent = conversationId;
+          }
+
+          removeTyping();
+          appendBubble(data.response, 'bot', true);
+        }catch(err){
+          console.error(err);
+          const elapsed = performance.now() - startTs;
+          lastLatencyMs = elapsed;
+          updateLatencyLabel();
+
+          if (err.name === 'AbortError'){
+            appendBubble(
+              selectedLang === 'es'
+                ? '(el modelo tardó demasiado en responder)'
+                : '(model took too long to respond)',
+              'error'
+            );
+          }else{
+            appendBubble(
+              selectedLang === 'es'
+                ? '(error al enviar mensaje)'
+                : '(error sending message)',
+              'error'
+            );
+          }
+        }finally{
+          setPending(false);
+        }
+      }
+
+      function setPending(val){
+        pending = !!val;
+        if (pending){
+          sendBtn.setAttribute('disabled','');
+          msgInput.setAttribute('disabled','');
+          msgInput.setAttribute('aria-disabled','true');
+        }else{
+          sendBtn.removeAttribute('disabled');
+          msgInput.removeAttribute('disabled');
+          msgInput.setAttribute('aria-disabled','false');
+          msgInput.focus();
+        }
+      }
+
+      function setLanguage(l){
+        selectedLang = l;
+        localStorage.setItem('aegis_lang', l);
+        langEs.classList.toggle('selected', l === 'es');
+        langEn.classList.toggle('selected', l === 'en');
+        msgInput.placeholder =
+          l === 'es' ? "Escribe tu mensaje..." : "Type your message...";
+
+        if (sourcesTitle){
+          sourcesTitle.textContent = (l === 'es' ? 'Fuentes' : 'Sources');
+        }
+
+        updateLatencyLabel();
+        clearSources();
+      }
+
+      function toggleMode(m){
+        currentMode = (currentMode === m) ? 'chat' : m;
+        modeIndicator.textContent =
+          (selectedLang === 'es' ? 'Modo: ' : 'Mode: ') +
+          (currentMode === 'web'
+            ? 'Web'
+            : currentMode === 'url'
+              ? 'URL'
+              : 'Chat');
+
+        webBtn.setAttribute('aria-pressed', String(currentMode === 'web'));
+        urlBtn.setAttribute('aria-pressed', String(currentMode === 'url'));
+
+        msgInput.placeholder =
+          currentMode === 'web'
+            ? (selectedLang === 'es'
+                 ? "Consulta para búsqueda web…"
+                 : "Query for web search…")
+            : currentMode === 'url'
+              ? (selectedLang === 'es'
+                   ? "Introduce URL…"
+                   : "Enter URL…")
+              : (selectedLang === 'es'
+                   ? "Escribe tu mensaje..."
+                   : "Type your message...");
+
+        msgInput.focus();
+      }
+
+      // ===========================
+      // EVENT LISTENERS
+      // ===========================
+      timeBtn.addEventListener('click', () => {
+        const msg = lastLatencyMs == null
+          ? (selectedLang === 'es'
+              ? 'Aún no hay respuestas medidas.'
+              : 'No response time measured yet.')
+          : (selectedLang === 'es'
+              ? `Última respuesta: ${formatLatency(lastLatencyMs)}`
+              : `Last reply: ${formatLatency(lastLatencyMs)}`);
+        appendBubble(msg, 'bot');
+      });
+
+      webBtn.addEventListener('click',()=>toggleMode('web'));
+      urlBtn.addEventListener('click',()=>toggleMode('url'));
+
+      sendBtn.addEventListener('click',()=>sendMessage(msgInput.value.trim()));
+
+      msgInput.addEventListener('keydown',e=>{
+        if (e.key === 'Enter'){
+          e.preventDefault();
+          sendMessage(msgInput.value.trim());
+        }
+      });
+
+      langEs.addEventListener('click',()=>setLanguage('es'));
+      langEn.addEventListener('click',()=>setLanguage('en'));
+
+      // --- Imagen → /analyze_image → posible contexto al chat ---
+      imgBtn.addEventListener('click', () => {
+        imgInput.click();
+      });
+
+      imgInput.addEventListener('change', async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        appendBubble(
+          selectedLang === 'es'
+            ? `📷 Imagen seleccionada: ${file.name}`
+            : `📷 Image selected: ${file.name}`,
+          'user'
+        );
+
+        appendBubble(
+          selectedLang === 'es'
+            ? 'Analizando imagen...'
+            : 'Analyzing image...',
+          'bot'
+        );
+
+        try {
+          const form = new FormData();
+          form.append('file', file);
+          form.append('lang', selectedLang);
+
+          const res = await fetchWithTimeout(
+            endpoints.analyzeImage,
+            {
+              method: 'POST',
+              body: form
+            },
+            {
+              timeout: CHAT_MAX_TIMEOUT_MS,
+              retries: 0
+            }
+          );
+
+          if (!res.ok) {
+            appendBubble(
+              selectedLang === 'es'
+                ? `(error /analyze_image ${res.status})`
+                : `(error /analyze_image ${res.status})`,
+              'error'
+            );
+            return;
+          }
+
+          const data = await res.json().catch(() => null);
+          if (!data || !data.description) {
+            appendBubble(
+              selectedLang === 'es'
+                ? '(no se pudo analizar la imagen)'
+                : '(could not analyze the image)',
+              'error'
+            );
+            return;
+          }
+
+          // 1) Mostrar análisis / aviso
+          appendBubble(data.description, 'bot', true);
+
+          // 2) Sólo mandar contexto al modelo si NO es el mensaje de "deshabilitado"
+          const disabledEs = 'Análisis de imagen deshabilitado';
+          const disabledEn = 'Image analysis is disabled';
+
+          const isDisabledMsg =
+            typeof data.description === 'string' &&
+            (data.description.includes(disabledEs) || data.description.includes(disabledEn));
+
+          if (!isDisabledMsg) {
+            sendMessage("Context from image:\n" + data.description);
+          }
+        } catch (err) {
+          console.error(err);
+          appendBubble(
+            selectedLang === 'es'
+              ? '(error analizando imagen)'
+              : '(error analyzing image)',
+            'error'
+          );
+        } finally {
+          imgInput.value = '';
+        }
+      });
+
+      exportConv.addEventListener('click',()=>{
+        if (!conversationId) return;
+        const data = JSON.stringify({conversation_id: conversationId});
+        const blob = new Blob([data],{type:'application/json'});
+        const url = URL.createObjectURL(blob);
+        const a = el('a',{attrs:{href:url,download:'aegis_conv.json'}});
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+      });
+
+      importConv.addEventListener('click',()=>hiddenFile.click());
+
+      hiddenFile.addEventListener('change',e=>{
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = ev=>{
+          try{
+            const obj = JSON.parse(ev.target.result);
+            if (obj.conversation_id){
+              conversationId = obj.conversation_id;
+              localStorage.setItem('aegis_conv', conversationId);
+              convIdDisplay.textContent = conversationId;
+              appendBubble(
+                selectedLang === 'es'
+                  ? '(conversación importada)'
+                  : '(conversation imported)',
+                'bot'
+              );
+            }
+          }catch(err){
+            console.error(err);
+            appendBubble(
+              selectedLang === 'es'
+                ? '(falló al importar)'
+                : '(failed to import)',
+              'error'
+            );
+          }
+        };
+        reader.readAsText(file);
+      });
+
+      clearConv.addEventListener('click',()=>{
+        localStorage.removeItem('aegis_conv');
+        conversationId = null;
+        convIdDisplay.textContent = '—';
+        appendBubble(
+          selectedLang === 'es'
+            ? '(id local borrado)'
+            : '(local id cleared)',
+          'bot'
+        );
+        clearSources();
+      });
+
+      // ===========================
+      // INIT
+      // ===========================
+      setLanguage(selectedLang);
+      updateLatencyLabel();
+
+      if (conversationId){
+        convIdDisplay.textContent = conversationId;
+        appendBubble(
+          selectedLang === 'es'
+            ? '(conversación cargada)'
+            : '(conversation loaded)',
+          'bot'
+        );
+      }else{
+        const welcomeEs =
+          "Hola, soy AEGIS (WizardCoder local). Pregúntame sobre código, arquitecturas, debugging o activa el modo Web para usar búsqueda.";
+        const welcomeEn =
+          "Hi, I'm AEGIS (local WizardCoder). Ask me about code, architectures, debugging, or toggle Web mode to use search.";
+        appendBubble(selectedLang === 'es' ? welcomeEs : welcomeEn, 'bot', false);
+      }
+
+      clearSources();
+    })();
+  </script>
+</body>
+</html>

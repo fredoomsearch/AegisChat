@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+*.db
+venv/
+.env
+models/*cache*
+ui/*.map
