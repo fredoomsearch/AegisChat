@@ -421,5 +421,10 @@ Some natural extensions for AegisChat:
 ---
 
 ## 📜 License
+This project is licensed under the **MIT License**.  
+Copyright © 2025 Julián Esteban Grajales Vergara.  
 
-*Add your license here (e.g. MIT, Apache-2.0, Julian Grajales,.).*
+
+
+
+
