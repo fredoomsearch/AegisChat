@@ -2,21 +2,30 @@
 #           BUILDER STAGE (Python deps)
 ##############################################
 FROM python:3.12-slim AS builder
+
 WORKDIR /build
+
+# Build tools for compiling any deps into wheels
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     && rm -rf /var/lib/apt/lists/*
+
 COPY requirements.txt .
-RUN pip install --upgrade pip
-RUN pip wheel --no-cache-dir --wheel-dir /build/wheels -r requirements.txt
-RUN ls -la /build/wheels  # Debug: List the generated wheels
+
+RUN pip install --upgrade pip \
+ && pip wheel --no-cache-dir --wheel-dir /build/wheels -r requirements.txt
 
 ##############################################
 #              FINAL RUNTIME IMAGE
 ##############################################
 FROM python:3.12-slim
+
 WORKDIR /app
-# System deps: llama.cpp (libgomp1) + curl + Tesseract OCR
+
+# Runtime system deps
+# - libgomp1: often needed by llama-cpp / some numeric libs
+# - curl: for healthcheck
+# - tesseract: OCR (spa + eng)
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libgomp1 \
     curl \
@@ -24,19 +33,20 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     tesseract-ocr-spa \
     tesseract-ocr-eng \
     && rm -rf /var/lib/apt/lists/*
-# Copy Python wheels from builder
+
+# Install wheels built in builder stage
 COPY --from=builder /build/wheels /wheels
-RUN ls -la /wheels  # Debug: Verify wheels are copied correctly
-RUN pip install --no-cache /wheels/*
-# Copy entire project
+RUN pip install --no-cache-dir /wheels/*
+
+# Copy app code
 COPY . .
-# llama.cpp environment (ajusta si quieres)
+
+# Optional llama.cpp env
 ENV LLAMA_THREADS=4
 ENV LLAMA_BATCH=512
-# Expose app port (Render usará $PORT, pero 8000 localmente)
+
 EXPOSE 8000
-# Healthcheck (usa curl que ya instalamos arriba)
-HEALTHCHECK --interval=20s --timeout=3s --start-period=20s --retries=3 \
-    CMD curl -f http://localhost:8000/health || exit 1
-# Default CMD (Render lo puede overridear)
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+
+# Render supplies $PORT; use sh so env var expands
+CMD ["sh", "-c", "uvicorn main:app --host 0.0.0.0 --port ${PORT:-8000}"]
+
