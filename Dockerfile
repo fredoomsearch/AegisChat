@@ -17,10 +17,17 @@ RUN set -eux; \
 
 COPY requirements.txt .
 
+# Optional but VERY useful: show requirements in build logs
+RUN set -eux; \
+    echo "----- requirements.txt -----"; \
+    sed -n '1,200p' requirements.txt; \
+    echo "----------------------------"; \
+    grep -i '^sqlalchemy' requirements.txt || (echo "ERROR: SQLAlchemy missing in requirements.txt" && exit 1)
+
 RUN set -eux; \
     pip install --upgrade pip; \
     pip wheel --wheel-dir /build/wheels -r requirements.txt; \
-    ls -la /build/wheels
+    ls -la /build/wheels | sed -n '1,200p'
 
 ##############################################
 #              FINAL RUNTIME IMAGE
@@ -46,21 +53,15 @@ RUN set -eux; \
         tesseract-ocr-eng; \
     rm -rf /var/lib/apt/lists/*
 
-# Wheelhouse from builder
 COPY --from=builder /build/wheels /wheels
-
-# Copy requirements and install using wheels as cache
 COPY requirements.txt .
 
 RUN set -eux; \
-    pip install --find-links=/wheels -r requirements.txt; \
+    pip install --no-index --find-links=/wheels -r requirements.txt; \
     python -c "import sqlalchemy; print('SQLAlchemy OK:', sqlalchemy.__version__)"; \
     rm -rf /wheels
 
-# App code
 COPY . .
 
 EXPOSE 8000
-
 CMD ["sh", "-c", "uvicorn main:app --host 0.0.0.0 --port ${PORT:-8000}"]
-
