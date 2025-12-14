@@ -19,7 +19,8 @@ COPY requirements.txt .
 
 RUN set -eux; \
     pip install --upgrade pip; \
-    pip wheel --wheel-dir /build/wheels -r requirements.txt
+    pip wheel --wheel-dir /build/wheels -r requirements.txt; \
+    ls -la /build/wheels
 
 ##############################################
 #              FINAL RUNTIME IMAGE
@@ -45,16 +46,21 @@ RUN set -eux; \
         tesseract-ocr-eng; \
     rm -rf /var/lib/apt/lists/*
 
+# Wheelhouse from builder
 COPY --from=builder /build/wheels /wheels
 
+# Copy requirements and install using wheels as cache
+COPY requirements.txt .
+
 RUN set -eux; \
-    pip install /wheels/*; \
+    pip install --find-links=/wheels -r requirements.txt; \
+    python -c "import sqlalchemy; print('SQLAlchemy OK:', sqlalchemy.__version__)"; \
     rm -rf /wheels
 
+# App code
 COPY . .
 
 EXPOSE 8000
 
-# Render uses $PORT; this expands env vars correctly
 CMD ["sh", "-c", "uvicorn main:app --host 0.0.0.0 --port ${PORT:-8000}"]
 
